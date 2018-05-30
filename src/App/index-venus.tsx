@@ -3,10 +3,13 @@ import { enquireScreen } from 'enquire-js';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import * as React from 'react';
-import { BrowserRouter as Router, RouteComponentProps, withRouter } from 'react-router-dom';
-import { Redirect, Route, Switch } from 'react-router-dom';
-import { getAsyncComponent } from './helper';
+import { HashRouter as Router, RouteComponentProps, withRouter } from 'react-router-dom';
+// import { RootStore } from '../../rootStore';
 import MenusComponent from './Menus';
+// import Drawer from '../../components/Drawer';
+import RoutesComponent from './Routes';
+// import requireAuth from './common/Auth';
+// import styles from './style.less';
 
 const { Header, Content } = Layout;
 
@@ -43,11 +46,7 @@ class AppComponent extends React.Component<Iprops, {}> {
           />
         </Header>
         <Content style={{ background: '#fff', padding: '24px' }}>
-          <Switch>
-            <Route key="default" exact={true} path="/"><Redirect to={{ pathname: '/home' }} /></Route>
-            <Route key="home" path="/home" component={getAsyncComponent(() => import('../pages/Home/index'))} />
-            <Route key="not-found" path="*" component={getAsyncComponent(() => import('../pages/NotFound/index'))} />
-          </Switch>
+          <RoutesComponent />
         </Content>
       </Layout>
     );

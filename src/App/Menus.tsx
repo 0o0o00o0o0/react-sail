@@ -1,11 +1,11 @@
+import { Menu } from 'antd';
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, Icon } from 'antd';
 
-interface Props {
-  isMobile: boolean;
+interface Iprops {
   pathname: string;
-  onMenuClick?: Function;
+  style?: React.CSSProperties;
+  onMenuClick?: () => void;
 }
 
 // config menus
@@ -13,18 +13,31 @@ const menuItems = [
   {
     id: '/home',
     label: 'Home',
-    icon: 'home',
     path: '/home'
   },
   {
     id: 'users',
     label: '用户管理',
-    icon: 'user',
     path: '/users',
     sub: [
       { id: '/users/customer', label: '前台用户', path: '/users/customer' },
       { id: '/users/admin', label: '后台用户', path: '/users/admin' }
     ]
+  },
+  {
+    id: '/about',
+    label: 'About',
+    path: '/about'
+  },
+  {
+    id: '/echarts',
+    label: 'Echarts',
+    path: '/echarts'
+  },
+  {
+    id: '/404',
+    label: '404',
+    path: '/404'
   }
 ];
 
@@ -39,27 +52,7 @@ const getDefaultSelectedKey = (pathname: string) => {
   return pathname;
 };
 
-const getDefaultOpenedKey = (s: string) => {
-  let str = '';
-  const k = s.split('/')[1] || null;
-  if (k) {
-    try {
-      menuItems.forEach(m => {
-        if (m.id === k && m.sub) {
-          str = m.id;
-          throw new Error('exit-forEach');
-        }
-      });
-    } catch (e) {
-      if (e.message !== 'exit-forEach') {
-        throw e;
-      }
-    }
-  }
-  return str;
-};
-
-class MenusComponent extends React.Component<Props, {}> {
+class MenusComponent extends React.Component<Iprops, {}> {
 
   handleMenuClick = () => {
     const { onMenuClick } = this.props;
@@ -69,22 +62,20 @@ class MenusComponent extends React.Component<Props, {}> {
   }
 
   render() {
-    const { isMobile } = this.props;
     const defaultSelectKey = getDefaultSelectedKey(this.props.pathname);
-    const defaultOpenKey = getDefaultOpenedKey(defaultSelectKey);
 
     return (
       <Menu
-        theme={isMobile ? 'light' : 'dark'}
-        mode="inline"
-        defaultOpenKeys={[defaultOpenKey]}
+        theme="light"
+        mode="horizontal"
         selectedKeys={[defaultSelectKey]}
+        style={{ ...this.props.style }}
       >
         {menuItems.map(i => (
           i.sub ?
             <Menu.SubMenu
               key={i.id}
-              title={<span><Icon type={i.icon} /><span>{i.label}</span></span>}
+              title={<span>{i.label}</span>}
             >
               {i.sub.map(sub => (
                 <Menu.Item key={sub.id}>
@@ -97,7 +88,6 @@ class MenusComponent extends React.Component<Props, {}> {
             :
             <Menu.Item key={i.id}>
               <Link to={i.path} onClick={this.handleMenuClick}>
-                <Icon type={i.icon} />
                 <span>{i.label}</span>
               </Link>
             </Menu.Item>))}

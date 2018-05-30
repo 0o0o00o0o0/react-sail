@@ -1,6 +1,10 @@
-import axios, { AxiosRequestConfig } from 'axios';
+/**
+ * reference to   https://github.com/ant-design/ant-design-pro/blob/master/src/utils/request.js
+ */
 import { notification } from 'antd';
-// import rootStore from '../stores/RootStore';
+import axios, { AxiosRequestConfig } from 'axios';
+import rootStore from '../rootStore';
+import { getCredentials, storage } from './helper';
 
 const codeMessage = {
   200: '服务器成功返回请求的数据。',
@@ -22,33 +26,32 @@ const codeMessage = {
 
 /**
  * Requests a URL, returning a promise.
- *
+ * @param  {string} url       The URL we want to request
  * @param  {object} [options] The options we want to pass to "fetch"
  * @return {any}           An object containing either "data" or "err"
  */
-const request = async (options: AxiosRequestConfig): Promise<any> => {
-  const storageCredential = localStorage.getItem('credentials');
-  const credentials = storageCredential ? JSON.parse(storageCredential) : null;
+const request = async (url: string, options: AxiosRequestConfig = {}): Promise<any> => {
+  const token = getCredentials('token');
 
   const newOptions = {
-    headers: { Authorization: `Bearer ${(credentials && credentials.access_token) || ''}` },
+    headers: { Authorization: `Bearer ${token || ''}` },
     ...options
   };
 
   try {
-    const res = await axios({ ...newOptions });
+    const res = await axios({ ...newOptions, ...{ url } });
     return res.data;
   } catch (error) {
-    const { status, statusText, data: errorText } = error.response;
+    const { status, statusText } = error.response;
 
     notification.error({
-      message: `http请求错误 ${status} ${options.url}`,
-      description: codeMessage[status] || statusText
+      description: codeMessage[status] || statusText,
+      message: `http请求错误 ${status} ${url}`
     });
 
-    if (status === 401 && errorText === 'Unauthorized') {
-      localStorage.removeItem('credentials');
-      // rootStore.setAuthed(false);
+    if (status === 401) {
+      storage.removeItem('credentials');
+      rootStore.setAuthed(false);
     }
 
     throw error;
